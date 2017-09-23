@@ -1,11 +1,12 @@
 const Eris = require('eris')
 const config = require('./config.json')
+const { exec } = require('child_process')
 
 // Replace BOT_TOKEN with your bot account's token
 var bot = new Eris.CommandClient(config.token, {}, {
   description: 'Experimental bot not working very well',
   owner: 'KhaaZ#2030',
-  prefix: 'k'
+  prefix: ['k', '@mention ']
 })
 
 // Startup stuff
@@ -17,33 +18,11 @@ bot.on('ready', () => { // When the bot is ready
   bot.editStatus(null, { name: 'bullied by Khaaz', type: 0 })
 })
 
-// CORE STUFF DO NOT TOUCH ELSE THE BOT MIGHT NOT WORK CORRECTLY
+// CORE STUFF
 var version = 'V 1.x Dev; private release for Khaaz'
 var codeblock = '\u0060\u0060\u0060'
 var informations = ['0892#.K akiM yb tobmE htiw detaerc', 'etivni/ten.tobonyd//:sptth :tob eno-ni-lla tseb eht - yadot tobonyD yrT', '!snoitcnuf erom rof toB ytrilF teG', ".htlaeh ruoy rof ,kaerb a ekaT !CP ruoy no emit hcum oot dneps t'noD :ofnI", ')lol( DNUOF TON OFNI 404 :ofnI', '?thgir ,ydaerla taht wenk uoy tuB .tob tseb tobmE :ofnI', 'tobme/akimsulpsbn/etis/moc.elgoog.setis//:sptth :tuo siht kcehC ?tobmE ekiL', "!htlaeh ruoy rof doog ton si gnikomS .trats t'nod - trams eB :ofnI", "!erawlam llatsni dluoc yeht ,drocsiD no sknil modnar kcilc t'noD", '!ipa-drocsid/gg.drocsid ot oG ?stoB htiw pleh deeN', 'ecnaraeppA rednu sgnitteS drocsiD ruoy ni edom repoleveD elbanE :ofnI', ')edom repoleveD htiw( DI ypoc tceles dna eman lennahc eht kcilc-thgir ,drocsiD ni lennahc a fo DI eht teg oT :ofnI', ')edom repoleveD htiw( DI ypoc tceles dna eman lennahc eht kcilc-thgir ,drocsiD ni lennahc a fo DI eht teg oT :ofnI', ')edom repoleveD htiw( DI ypoc tceles dna eman lennahc eht kcilc-thgir ,drocsiD ni lennahc a fo DI eht teg oT :ofnI', '!ecivreS fo smreT drocsiD eht yb detibihorp si tnuocca resu a no tob a gninnuR :ofnI', '!drocsiD sgniht lla htiw pleh dnif uoy buh/gg.drocsid tA ?tsol gnileeF :ofnI', 'Baum']// 14 infos//
-
-bot.on('guildCreate', guild => {
-  if (guild.id === '317016214498967552') {
-    bot.createMessage('348197393000562701', `embot checkin system register`)
-  }
-})
-
-process.on('uncaughtException', (err) => {
-  console.log(`An error occured: ${err}`)
-})
-
-bot.on('messageCreate', (msg) => {
-  if (msg.content === ':bullettrain_front: Registered Bot as Embot!') {
-    bot.createMessage('348197393000562701', bot.commandOptions.prefix)
-  }
-})
-
-bot.on('messageCreate', (msg) => { // When a message is created
-  if (msg.content === 'embot checkin system prefix check') { //
-    bot.createMessage(msg.channel.id, bot.commandOptions.prefix)
-  }
-})
-// NOW YOU CAN DO YOUR STUFF AGAIN
+// CORE STUFF END
 
 // base commands
 bot.registerCommandAlias('halp', 'help') // Alias !halp to !help
@@ -53,6 +32,25 @@ bot.registerCommand('ping', 'Pong!', { // Make a ping command
   description: 'Pings the bot. But kinda pointless since this already confirms Embot is up.',
   fullDescription: "This command could be used to check if the bot is up. Or entertainment when you're bored."
 })
+
+bot.registerCommand('restart', (msg, args) => {
+  if (msg.author.id === '179908288337412096') { // USER ID HERE!
+    exec('pm2 restart DhaazenBot', (error, stdout, stderr) => {
+      if (error) {
+        console.error(`exec error: ${error}`)
+        return
+      }
+      console.log(`stdout: ${stdout}`)
+      console.log(`stderr: ${stderr}`)
+    })
+  }
+  if (msg.author.id !== '179908288337412096') { // USER ID HERE!
+    bot.createMessage(msg.channel.id, ':no_entry_sign: Sorry, eval is not available for you.')
+  }
+}), {
+  description: 'Restart the bot',
+  fullDescription: 'Restart the bot'
+}
 
 var infoCommand = bot.registerCommand('info', (msg, args) => { // Info command 2.0
   bot.createMessage(msg.channel.id, {
@@ -352,6 +350,58 @@ embedCommand.registerSubcommand('idea', (msg, args) => {
   description: 'Idea embed',
   fullDescription: 'Idea embed',
   usage: ' '
+})
+
+var sayCommand = bot.registerCommand('say', (msg, args) => { // Make an echo command
+  if (args.length === 0) { // If the user just typed "!echo", say "Invalid input"
+    return 'Invalid input'
+  }
+  msg.delete()
+  var text = args.join(' ') // Make a string of the text after the command label
+  return text // Return the generated string
+}, {
+  description: 'Make the bot say something',
+  fullDescription: 'The bot will say whatever is after the command label.',
+  usage: '<text>'
+})
+
+sayCommand.registerSubcommand('reverse', (msg, args) => { // Make a reverse subcommand under echo
+  if (args.length === 0) { // If the user just typed "!echo reverse", say "Invalid input"
+    return 'Invalid input'
+  }
+  msg.delete()
+  var text = args.join(' ') // Make a string of the text after the command label
+  text = text.split('').reverse().join('') // Reverse the string
+  return text // Return the generated string
+}, {
+  description: 'Make the bot say something in reverse',
+  fullDescription: 'The bot will say, in reverse, whatever is after the command label.',
+  usage: '<text>'
+})
+
+var announceComand = bot.registerCommand('announce', (msg, args) => { // Make an echo command
+  if (args.length === 0) { // If the user just typed "!echo", say "Invalid input"
+    return 'Invalid input'
+  }
+  var text = args.join(' ') // Make a string of the text after the command label
+  return bot.createMessage(msg.channel.id, {
+    embed: {
+      author: {
+        name: 'Dhaazenbot'
+      },
+      fields: [
+        {
+          name: 'Announcement',
+          value: text,
+          inline: true
+        }
+      ]
+    }
+  })
+}, {
+  description: 'Make the bot announce something with embed',
+  fullDescription: 'The bot will announce with embed whatever is after the command label.',
+  usage: '<text>'
 })
 
 bot.connect()
