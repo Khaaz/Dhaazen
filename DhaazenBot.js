@@ -109,17 +109,39 @@ bot.registerCommandAlias('halp', 'help') // Alias !halp to !help
 
 // PRIVATE COMMANDS
 //
+// Restart | Eval
+//
 // Restart command
 bot.registerCommand('restart', (msg, args) => {
   if (msg.author.id === '179908288337412096') { // USER ID HERE!
-    exec('pm2 restart DhaazenBot', (error, stdout, stderr) => {
-      if (error) {
-        console.error(`exec error: ${error}`)
-        return
+    msg.delete()
+    bot.createMessage(msg.channel.id, {
+      embed: {
+        color: 3066993,
+        description: 'Restarting...'
       }
-      console.log(`stdout: ${stdout}`)
-      console.log(`stderr: ${stderr}`)
     })
+      .then(msg => {
+        setTimeout(function () {
+          msg.delete()
+        }, 5000)
+      })
+    setTimeout(function () {
+      exec('pm2 restart DhaazenBot', (error, stdout, stderr) => {
+        if (error) {
+          console.error(`exec error: ${error}`)
+          return
+        }
+        console.log(`stdout: ${stdout}`)
+        console.log(`stderr: ${stderr}`)
+      })
+      bot.createMessage(msg.channel.id, {
+        embed: {
+          color: 3066993,
+          description: 'Restarted!'
+        }
+      })
+    }, 6000)
   }
   if (msg.author.id !== '179908288337412096') { // USER ID HERE!
     bot.createMessage(msg.channel.id, ':no_entry_sign: Sorry, restart is not available for you.')
@@ -178,10 +200,32 @@ bot.registerCommand('eval', (msg, args) => {
 
 // BASE COMMANDS
 //
+// Ping | Uptime | Membercount | info | say:reverse | announce
+//
 // Ping command
-bot.registerCommand('ping', `Pong!`, {
+bot.registerCommand('ping', (msg) => {
+  let start = Date.now()
+  bot.createMessage(msg.channel.id, {
+    embed: {
+      color: 3066993,
+      description: 'Pong!'
+    }
+  })
+    .then(msg => {
+      let diff = (Date.now() - start)
+      return msg.edit({
+        embed: {
+          color: 3066993,
+          description: `Pong! \`${diff}ms\``
+        }
+      })
+    })
+}, {
   description: 'Pings the bot.',
-  fullDescription: "This command could be used to check if the bot is up. Or entertainment when you're bored."
+  fullDescription: "This command could be used to check if the bot is up. Or entertainment when you're bored.",
+  cooldown: 2000,
+  cooldownMessage: `:no_entry_sign: A little too fast there..`,
+  cooldownReturns: 1
 })
 // Uptime command
 bot.registerCommand('uptime', (msg, args) => {
@@ -213,7 +257,10 @@ bot.registerCommand('uptime', (msg, args) => {
 }, {
   description: 'Uptime',
   fullDescription: 'Give bot uptime',
-  usage: `${dprefix}uptime`
+  usage: `${dprefix}uptime`,
+  cooldown: 2000,
+  cooldownMessage: `:no_entry_sign: A little too fast there..`,
+  cooldownReturns: 1
 })
 // Membercount command
 bot.registerCommand('members', (msg, args) => {
@@ -223,7 +270,7 @@ bot.registerCommand('members', (msg, args) => {
       fields: [
         {
           name: 'Members',
-          value: `${bot.memberCount}`,
+          value: `${msg.channel.guild.memberCount}`,
           inline: false
         }
       ]
@@ -232,10 +279,13 @@ bot.registerCommand('members', (msg, args) => {
 }, {
   description: 'Membercount',
   fullDescription: 'Give approximate number of members in the server',
-  usage: `${dprefix}members`
+  usage: `${dprefix}members`,
+  cooldown: 2000,
+  cooldownMessage: `:no_entry_sign: A little too fast there..`,
+  cooldownReturns: 1
 })
 // Info command
-var infoCommand = bot.registerCommand('info', (msg, args) => {
+bot.registerCommand('info', (msg, args) => {
   var uptime = bot.uptime
   var startime = bot.startTime
   var date = new Date(uptime)
@@ -249,10 +299,10 @@ var infoCommand = bot.registerCommand('info', (msg, args) => {
       color: 1752220,
       author: {
         name: 'Dhaazen',
-        icon_url: 'https://pbs.twimg.com/profile_images/715206777051168768/tc6Kx7Ky_400x400.jpg'
+        icon_url: bot.user.avatarURL
       },
       thumbnail: {
-        url: 'https://pbs.twimg.com/profile_images/715206777051168768/tc6Kx7Ky_400x400.jpg'
+        url: bot.user.avatarURL
       },
       fields: [
         {
@@ -262,12 +312,12 @@ var infoCommand = bot.registerCommand('info', (msg, args) => {
         },
         {
           name: 'Description',
-          value: '**Owner:**`KhaaZ#2030`\nExperimental bot using *javascript* and *eris* lib\nBased on the awesome Embot source code by `Mika K.#2980`',
+          value: '**Owner:**`KhaaZ#2030`\nExperimental bot using *javascript* and *eris* lib\nBased on the awesome Embot source code by `Mika K.#2980`\nBoosted by the dyno team :sunglasses:',
           inline: true
         },
         {
           name: 'Contributors',
-          value: '`Mika K.#2980`\n`Ape#7739`\n`AS04™#2793`',
+          value: '`Mika K.#2980`\n`Ape#7739`\n`AS04™#2793`\n`Zapp#0790`',
           inline: false
         },
         {
@@ -310,41 +360,68 @@ var infoCommand = bot.registerCommand('info', (msg, args) => {
 }, {
   description: 'Info about the bot',
   fullDescription: 'Info about the bot',
-  usage: `${dprefix}info`
+  usage: `${dprefix}info`,
+  cooldown: 2000,
+  cooldownMessage: `:no_entry_sign: A little too fast there..`,
+  cooldownReturns: 1
 })
 // Say command
-var sayCommand = bot.registerCommand('say', (msg, args) => { // Make an echo command
-  if (args.length === 0) { // If the user just typed "!echo", say "Invalid input"
-    return 'Invalid input'
+var sayCommand = bot.registerCommand('say', (msg, args) => {
+  if (args.length === 0) {
+    bot.createMessage(msg.channel.id, {
+      embed: {
+        color: 3066993,
+        description: `**Command:** [${dprefix}say]() \n**Usage:** ${dprefix}say <test>\n**Description:** The bot will say whatever is after the command label.`,
+        author: {
+          name: 'Commands',
+          icon_url: bot.user.dynamicAvatarURL('png')
+        }
+      }
+    })
   }
   msg.delete()
-  var text = args.join(' ') // Make a string of the text after the command label
-  return text // Return the generated string
+  var text = args.join(' ')
+  return text
 }, {
   description: 'Make the bot say something',
   fullDescription: 'The bot will say whatever is after the command label.',
-  usage: '<text>'
+  usage: `${dprefix}say <text>`,
+  cooldown: 2000,
+  cooldownMessage: `:no_entry_sign: A little too fast there..`,
+  cooldownReturns: 1
 })
-// Say reversecommand
-sayCommand.registerSubcommand('reverse', (msg, args) => { // Make a reverse subcommand under echo
-  if (args.length === 0) { // If the user just typed "!echo reverse", say "Invalid input"
+// Say:reverse command
+sayCommand.registerSubcommand('reverse', (msg, args) => {
+  if (args.length === 0) {
     return 'Invalid input'
   }
   msg.delete()
-  var text = args.join(' ') // Make a string of the text after the command label
+  var text = args.join(' ')
   text = text.split('').reverse().join('') // Reverse the string
-  return text // Return the generated string
+  return text
 }, {
   description: 'Make the bot say something in reverse',
   fullDescription: 'The bot will say, in reverse, whatever is after the command label.',
-  usage: `${dprefix}say <text>`
+  usage: `${dprefix}say <text>`,
+  cooldown: 2000,
+  cooldownMessage: `:no_entry_sign: A little too fast there..`,
+  cooldownReturns: 1
 })
 // Announce command
-var announceCommand = bot.registerCommand('announce', (msg, args) => { // Make an echo command
-  if (args.length === 0) { // If the user just typed "!echo", say "Invalid input"
-    return 'Invalid input'
+var announceCommand = bot.registerCommand('announce', (msg, args) => {
+  if (args.length === 0) {
+    bot.createMessage(msg.channel.id, {
+      embed: {
+        color: 3066993,
+        description: `**Command:** [${dprefix}announce]() \n**Usage:** ${dprefix}announce <test>\n**Description:** The bot will announce with embed whatever is after the command label.`,
+        author: {
+          name: 'Commands',
+          icon_url: bot.user.dynamicAvatarURL('png')
+        }
+      }
+    })
   }
-  var text = args.join(' ') // Make a string of the text after the command label
+  var text = args.join(' ')
   return bot.createMessage(msg.channel.id, {
     embed: {
       color: 1752220,
@@ -363,7 +440,10 @@ var announceCommand = bot.registerCommand('announce', (msg, args) => { // Make a
 }, {
   description: 'Make the bot announce something with embed',
   fullDescription: 'The bot will announce with embed whatever is after the command label.',
-  usage: `${dprefix}announce <text>`
+  usage: `${dprefix}announce <text>`,
+  cooldown: 2000,
+  cooldownMessage: `:no_entry_sign: A little too fast there..`,
+  cooldownReturns: 1
 })
 
 var supportCommand = bot.registerCommand('support', (msg, args) => { // Info command 2.0
