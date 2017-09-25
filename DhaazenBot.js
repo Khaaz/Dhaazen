@@ -19,7 +19,39 @@ bot.on('ready', () => { // When the bot is ready
 })
 
 bot.on('ready', () => { // When the bot is ready
-  bot.editStatus(null, { name: 'bullied by Khaaz', type: 0 })
+  bot.editStatus(null, { name: 'bullied by Khaaz | khelp', type: 0 })
+})
+
+bot.on('ready', () => {
+  bot.createMessage('361524475621277696', {
+    embed: {
+      timestamp: new Date(),
+      color: 2067276,
+      description: '**Online!**'
+    }
+  })
+})
+
+bot.on('error', (err, msg) => {
+  bot.createMessage('361605085572104203', {
+    embed: {
+      timestamp: new Date(),
+      color: 10038562,
+      description: `An Error occured.\n${err}`
+    }
+  })
+  console.log(`${err}`)
+})
+
+bot.on('warn', (msg) => {
+  bot.createMessage('361605104371236867', {
+    embed: {
+      timestamp: new Date(),
+      color: 11027200,
+      description: `${msg}`
+    }
+  })
+  console.log(`${msg}`)
 })
 //
 //
@@ -126,6 +158,13 @@ bot.registerCommand('restart', (msg, args) => {
           msg.delete()
         }, 5000)
       })
+    bot.createMessage('361524475621277696', {
+      embed: {
+        timestamp: new Date(),
+        color: 3066993,
+        description: '==> Restarting!'
+      }
+    })
     setTimeout(function () {
       exec('pm2 restart DhaazenBot', (error, stdout, stderr) => {
         if (error) {
@@ -137,6 +176,7 @@ bot.registerCommand('restart', (msg, args) => {
       })
       bot.createMessage(msg.channel.id, {
         embed: {
+          timestamp: new Date(),
           color: 3066993,
           description: 'Restarted!'
         }
@@ -195,34 +235,397 @@ bot.registerCommand('eval', (msg, args) => {
   },
   permissionMessage: ':no_entry_sign: You dont have permission to do that.'
 })
+
+bot.registerCommandAlias('e', 'eval')
 //
 // PRIVATE COMMANDS END
 
+// LOGS
+//
+// GlobalLog
+//
+bot.on('guildCreate', (guild) => { // Log create guild
+  var dateC = new Date(guild.createdAt)
+  var dateCreated = ''
+  dateCreated += dateC.getUTCMonth() + 1 + ', '
+  dateCreated += dateC.getUTCDate() + ', '
+  dateCreated += dateC.getUTCFullYear() + ' at '
+  dateCreated += dateC.getUTCHours() + 2 + ' h, '
+  dateCreated += dateC.getUTCMinutes() + ' min'
+  var dateJ = new Date(guild.joinedAt)
+  var dateJoined = ''
+  dateJoined += dateJ.getUTCMonth() + 1 + ', '
+  dateJoined += dateJ.getUTCDate() + ', '
+  dateJoined += dateJ.getUTCFullYear() + ' at '
+  dateJoined += dateJ.getUTCHours() + 2 + 'h, '
+  dateJoined += dateJ.getUTCMinutes() + 'min'
+  bot.createMessage('361246399922307073', {
+    embed: {
+      timestamp: new Date(),
+      color: 3066993,
+      author: {
+        name: `${guild.name}`,
+        icon_url: `${guild.iconURL}`
+      },
+      thumbnail: {
+        url: `${guild.iconURL}`
+      },
+      footer: {
+        icon_url: bot.user.avatarURL,
+        text: 'Dhaazen'
+      },
+      description: `Dhaazen was added to: ${guild.name}`,
+      fields: [
+        {
+          name: 'ID:',
+          value: `${guild.id}`
+        },
+        {
+          name: 'Region:',
+          value: `${guild.region}`
+        },
+        {
+          name: 'Owner:',
+          value: `${guild.ownerID}`
+        },
+        {
+          name: 'Created at:',
+          value: `${dateCreated}`,
+          inline: true
+        },
+        {
+          name: 'Joined at:',
+          value: `${dateJoined}`,
+          inline: true
+        },
+        {
+          name: 'Members:',
+          value: `${guild.members.size}`,
+          inline: true
+        },
+        {
+          name: 'Channels:',
+          value: `${guild.channels.size}`,
+          inline: true
+        }
+      ]
+    }
+  })
+})
+
+bot.on('guildDelete', (guild) => { // Log delete guild
+  var dateC = new Date(guild.createdAt)
+  var dateCreated = ''
+  dateCreated += dateC.getUTCMonth() + 1 + ', '
+  dateCreated += dateC.getUTCDate() + ', '
+  dateCreated += dateC.getUTCFullYear() + ' at '
+  dateCreated += dateC.getUTCHours() + 2 + ' h, '
+  dateCreated += dateC.getUTCMinutes() + ' min'
+  var dateJ = new Date(guild.joinedAt)
+  var dateJoined = ''
+  dateJoined += dateJ.getUTCMonth() + 1 + ', '
+  dateJoined += dateJ.getUTCDate() + ', '
+  dateJoined += dateJ.getUTCFullYear() + ' at '
+  dateJoined += dateJ.getUTCHours() + 2 + 'h, '
+  dateJoined += dateJ.getUTCMinutes() + 'min'
+  bot.createMessage('361246399922307073', {
+    embed: {
+      timestamp: new Date(),
+      color: 15158332,
+      author: {
+        name: `${guild.name}`,
+        icon_url: `${guild.iconURL}`
+      },
+      thumbnail: {
+        url: `${guild.iconURL}`
+      },
+      footer: {
+        icon_url: bot.user.avatarURL,
+        text: 'Dhaazen'
+      },
+      description: `Dhaazen was removed from: ${guild.name}`,
+      fields: [
+        {
+          name: 'ID:',
+          value: `${guild.id}`
+        },
+        {
+          name: 'Region:',
+          value: `${guild.region}`
+        },
+        {
+          name: 'Owner:',
+          value: `${guild.ownerID}`
+        },
+        {
+          name: 'Created at:',
+          value: `${dateCreated}`,
+          inline: true
+        },
+        {
+          name: 'Joined at:',
+          value: `${dateJoined}`,
+          inline: true
+        },
+        {
+          name: 'Members:',
+          value: `${guild.members.size}`,
+          inline: true
+        },
+        {
+          name: 'Channels:',
+          value: `${guild.channels.size}`,
+          inline: true
+        }
+      ]
+    }
+  })
+})
+
+bot.on('guildAvailable', (guild) => { // Log Available guild
+  var dateC = new Date(guild.createdAt)
+  var dateCreated = ''
+  dateCreated += dateC.getUTCMonth() + 1 + ', '
+  dateCreated += dateC.getUTCDate() + ', '
+  dateCreated += dateC.getUTCFullYear() + ' at '
+  dateCreated += dateC.getUTCHours() + 2 + ' h, '
+  dateCreated += dateC.getUTCMinutes() + ' min'
+  var dateJ = new Date(guild.joinedAt)
+  var dateJoined = ''
+  dateJoined += dateJ.getUTCMonth() + 1 + ', '
+  dateJoined += dateJ.getUTCDate() + ', '
+  dateJoined += dateJ.getUTCFullYear() + ' at '
+  dateJoined += dateJ.getUTCHours() + 2 + 'h, '
+  dateJoined += dateJ.getUTCMinutes() + 'min'
+  bot.createMessage('361246399922307073', {
+    embed: {
+      timestamp: new Date(),
+      color: 3066993,
+      author: {
+        name: `${guild.name}`,
+        icon_url: `${guild.iconURL}`
+      },
+      thumbnail: {
+        url: `${guild.iconURL}`
+      },
+      footer: {
+        icon_url: bot.user.avatarURL,
+        text: 'Dhaazen'
+      },
+      description: `New guild available: ${guild.name}`,
+      fields: [
+        {
+          name: 'ID:',
+          value: `${guild.id}`
+        },
+        {
+          name: 'Region:',
+          value: `${guild.region}`
+        },
+        {
+          name: 'Owner:',
+          value: `${guild.ownerID}`
+        },
+        {
+          name: 'Created at:',
+          value: `${dateCreated}`,
+          inline: true
+        },
+        {
+          name: 'Joined at:',
+          value: `${dateJoined}`,
+          inline: true
+        },
+        {
+          name: 'Members:',
+          value: `${guild.members.size}`,
+          inline: true
+        },
+        {
+          name: 'Channels:',
+          value: `${guild.channels.size}`,
+          inline: true
+        }
+      ]
+    }
+  })
+})
+
+bot.on('guildUnavailable', (guild) => { // Log Unavailable guild
+  var dateC = new Date(guild.createdAt)
+  var dateCreated = ''
+  dateCreated += dateC.getUTCMonth() + 1 + ', '
+  dateCreated += dateC.getUTCDate() + ', '
+  dateCreated += dateC.getUTCFullYear() + ' at '
+  dateCreated += dateC.getUTCHours() + 2 + ' h, '
+  dateCreated += dateC.getUTCMinutes() + ' min'
+  var dateJ = new Date(guild.joinedAt)
+  var dateJoined = ''
+  dateJoined += dateJ.getUTCMonth() + 1 + ', '
+  dateJoined += dateJ.getUTCDate() + ', '
+  dateJoined += dateJ.getUTCFullYear() + ' at '
+  dateJoined += dateJ.getUTCHours() + 2 + 'h, '
+  dateJoined += dateJ.getUTCMinutes() + 'min'
+  bot.createMessage('361246399922307073', {
+    embed: {
+      timestamp: new Date(),
+      color: 15158332,
+      author: {
+        name: `${guild.name}`,
+        icon_url: `${guild.iconURL}`
+      },
+      thumbnail: {
+        url: `${guild.iconURL}`
+      },
+      footer: {
+        icon_url: bot.user.avatarURL,
+        text: 'Dhaazen'
+      },
+      description: `New guild unavailable: ${guild.name}`,
+      fields: [
+        {
+          name: 'ID:',
+          value: `${guild.id}`
+        },
+        {
+          name: 'Region:',
+          value: `${guild.region}`
+        },
+        {
+          name: 'Owner:',
+          value: `${guild.ownerID}`
+        },
+        {
+          name: 'Created at:',
+          value: `${dateCreated}`,
+          inline: true
+        },
+        {
+          name: 'Joined at:',
+          value: `${dateJoined}`,
+          inline: true
+        },
+        {
+          name: 'Members:',
+          value: `${guild.members.size}`,
+          inline: true
+        },
+        {
+          name: 'Channels:',
+          value: `${guild.channels.size}`,
+          inline: true
+        }
+      ]
+    }
+  })
+})
+
+//
+// ServerLog
+/*
+if(guild.id==='358685866878566400') {
+  bot.on()
+} else {
+  return;
+}
+*/
+// LOGS END
+
 // BASE COMMANDS
 //
-// Ping | Uptime | Membercount | info | say:reverse | announce
+// Support | Ping | Invite | Uptime | Membercount | Info | Say:reverse | Announce | version | Embed
 //
+// Support command
+bot.registerCommand('support', (msg, args) => { // Info command 2.0
+  bot.createMessage(msg.channel.id, {
+    embed: {
+      color: 1752220,
+      timestamp: new Date(),
+      footer: {
+        icon_url: bot.user.avatarURL
+      },
+      author: {
+        name: 'Dhaazen',
+        icon_url: bot.user.avatarURL
+      },
+      description: 'Need help? Feel free to join our support server!',
+      fields: [
+        {
+          name: 'Support Server',
+          value: 'Dhaazen official support server : https://discord.gg/JtbEDuf',
+          inline: false
+        }
+      ]
+    }
+  })
+}, {
+  description: 'Need Help?',
+  fullDescription: 'Need Help?',
+  usage: `${dprefix}support`,
+  cooldown: 2000,
+  cooldownMessage: `:no_entry_sign: A little too fast there..`,
+  cooldownReturns: 1
+})
 // Ping command
 bot.registerCommand('ping', (msg) => {
+  var startime = bot.startTime
   let start = Date.now()
   bot.createMessage(msg.channel.id, {
     embed: {
       color: 3066993,
-      description: 'Pong!'
+      timestamp: new Date(startime),
+      footer: {
+        text: 'Started at'
+      },
+      description: '**Pong!**'
     }
   })
     .then(msg => {
       let diff = (Date.now() - start)
       return msg.edit({
         embed: {
+          timestamp: new Date(startime),
+          footer: {
+            text: 'Started at'
+          },
           color: 3066993,
-          description: `Pong! \`${diff}ms\``
+          description: `**Pong!** \`${diff}ms\``
         }
       })
     })
 }, {
   description: 'Pings the bot.',
   fullDescription: "This command could be used to check if the bot is up. Or entertainment when you're bored.",
+  cooldown: 2000,
+  cooldownMessage: `:no_entry_sign: A little too fast there..`,
+  cooldownReturns: 1
+})
+// Invite command
+bot.registerCommand('invite', (msg, args) => {
+  bot.createMessage(msg.channel.id, {
+    embed: {
+      color: 1752220,
+      timestamp: new Date(),
+      author: {
+        name: 'Dhaazen',
+        icon_url: bot.user.avatarURL
+      },
+      footer: {
+        incon_url: bot.user.avatarURL
+      },
+      fields: [
+        {
+          name: 'Invite',
+          value: 'Add me to your server!\n[invite me](https://discordapp.com/oauth2/authorize?client_id=360859616558579713&scope=bot&permissions=201714753)',
+          inline: false
+        }
+      ]
+    }
+  })
+}, {
+  description: 'Invite me!',
+  fullDescription: 'Invite me to your server!',
+  usage: `${dprefix}invite`,
   cooldown: 2000,
   cooldownMessage: `:no_entry_sign: A little too fast there..`,
   cooldownReturns: 1
@@ -262,16 +665,29 @@ bot.registerCommand('uptime', (msg, args) => {
   cooldownMessage: `:no_entry_sign: A little too fast there..`,
   cooldownReturns: 1
 })
+
+bot.registerCommandAlias('up', 'uptime')
 // Membercount command
-bot.registerCommand('members', (msg, args) => {
+bot.registerCommand('membercount', (msg, args) => {
   bot.createMessage(msg.channel.id, {
     embed: {
       color: 1752220,
+      timestamp: new Date(),
       fields: [
         {
-          name: 'Members',
+          name: 'Total',
           value: `${msg.channel.guild.memberCount}`,
-          inline: false
+          inline: true
+        },
+        {
+          name: 'Humans',
+          value: `${msg.channel.guild.memberCount}`,
+          inline: true
+        },
+        {
+          name: 'Bots',
+          value: `${msg.channel.guild.memberCount}`,
+          inline: true
         }
       ]
     }
@@ -284,6 +700,8 @@ bot.registerCommand('members', (msg, args) => {
   cooldownMessage: `:no_entry_sign: A little too fast there..`,
   cooldownReturns: 1
 })
+
+bot.registerCommandAlias('members', 'membercount')
 // Info command
 bot.registerCommand('info', (msg, args) => {
   var uptime = bot.uptime
@@ -342,7 +760,7 @@ bot.registerCommand('info', (msg, args) => {
         },
         {
           name: 'Users',
-          value: `${bot.users.size}`,
+          value: `${bot.guilds.map(g => g.memberCount).reduce((a, b) => a + b)}`,
           inline: true
         },
         {
@@ -365,12 +783,14 @@ bot.registerCommand('info', (msg, args) => {
   cooldownMessage: `:no_entry_sign: A little too fast there..`,
   cooldownReturns: 1
 })
+
+bot.registerCommandAlias('botinfo', 'info')
 // Say command
 var sayCommand = bot.registerCommand('say', (msg, args) => {
   if (args.length === 0) {
     bot.createMessage(msg.channel.id, {
       embed: {
-        color: 3066993,
+        color: 15158332,
         description: `**Command:** [${dprefix}say]() \n**Usage:** ${dprefix}say <test>\n**Description:** The bot will say whatever is after the command label.`,
         author: {
           name: 'Commands',
@@ -378,10 +798,11 @@ var sayCommand = bot.registerCommand('say', (msg, args) => {
         }
       }
     })
+  } else {
+    msg.delete()
+    var text = args.join(' ')
+    return text
   }
-  msg.delete()
-  var text = args.join(' ')
-  return text
 }, {
   description: 'Make the bot say something',
   fullDescription: 'The bot will say whatever is after the command label.',
@@ -393,16 +814,26 @@ var sayCommand = bot.registerCommand('say', (msg, args) => {
 // Say:reverse command
 sayCommand.registerSubcommand('reverse', (msg, args) => {
   if (args.length === 0) {
-    return 'Invalid input'
+    bot.createMessage(msg.channel.id, {
+      embed: {
+        color: 15158332,
+        description: `**Command:** [${dprefix}say reverse]() \n**Usage:** ${dprefix}say reverse <test>\n**Description:** The bot will say, in reverse, whatever is after the command label.`,
+        author: {
+          name: 'Commands',
+          icon_url: bot.user.dynamicAvatarURL('png')
+        }
+      }
+    })
+  } else {
+    msg.delete()
+    var text = args.join(' ')
+    text = text.split('').reverse().join('') // Reverse the string
+    return text
   }
-  msg.delete()
-  var text = args.join(' ')
-  text = text.split('').reverse().join('') // Reverse the string
-  return text
 }, {
   description: 'Make the bot say something in reverse',
   fullDescription: 'The bot will say, in reverse, whatever is after the command label.',
-  usage: `${dprefix}say <text>`,
+  usage: `${dprefix}say reverse <text>`,
   cooldown: 2000,
   cooldownMessage: `:no_entry_sign: A little too fast there..`,
   cooldownReturns: 1
@@ -412,7 +843,7 @@ var announceCommand = bot.registerCommand('announce', (msg, args) => {
   if (args.length === 0) {
     bot.createMessage(msg.channel.id, {
       embed: {
-        color: 3066993,
+        color: 15158332,
         description: `**Command:** [${dprefix}announce]() \n**Usage:** ${dprefix}announce <test>\n**Description:** The bot will announce with embed whatever is after the command label.`,
         author: {
           name: 'Commands',
@@ -420,23 +851,15 @@ var announceCommand = bot.registerCommand('announce', (msg, args) => {
         }
       }
     })
+  } else {
+    var text = args.join(' ')
+    bot.createMessage(msg.channel.id, {
+      embed: {
+        color: 1752220,
+        description: text
+      }
+    })
   }
-  var text = args.join(' ')
-  return bot.createMessage(msg.channel.id, {
-    embed: {
-      color: 1752220,
-      author: {
-        name: 'Dhaazenbot'
-      },
-      fields: [
-        {
-          name: 'Announcement',
-          value: text,
-          inline: true
-        }
-      ]
-    }
-  })
 }, {
   description: 'Make the bot announce something with embed',
   fullDescription: 'The bot will announce with embed whatever is after the command label.',
@@ -445,41 +868,16 @@ var announceCommand = bot.registerCommand('announce', (msg, args) => {
   cooldownMessage: `:no_entry_sign: A little too fast there..`,
   cooldownReturns: 1
 })
-
-var supportCommand = bot.registerCommand('support', (msg, args) => { // Info command 2.0
-  bot.createMessage(msg.channel.id, {
-    embed: {
-      author: {
-        name: 'Embot',
-        icon_url: 'https://cdn.discordapp.com/avatars/347683207929397248/1b8c9cdf468336b46c9099fc9ed652df.jpg?size=128'
-      },
-      thumbnail: {
-        url: 'https://cdn.discordapp.com/avatars/347683207929397248/1b8c9cdf468336b46c9099fc9ed652df.jpg?size=128'
-      },
-      fields: [
-        {
-          name: 'Need help... ',
-          value: '...or just wanna talk about code? Join us here: https://discord.gg/7AR5P8H',
-          inline: true
-        }
-      ]
-    }
-  })
-}, {
-  description: 'Need Help?',
-  fullDescription: 'Need Help?',
-  usage: ' '
-})
-
-var supportCommand = bot.registerCommand('version', (msg, args) => { // Info command 2.0
+// Version command
+bot.registerCommand('version', (msg, args) => { // Info command 2.0
   bot.createMessage(msg.channel.id, `This Embot is running Embot version ${version}`)
 }, {
   description: 'View the version of Embot',
   fullDescription: 'View the version of Embot',
   usage: ' '
 })
-
-var embedCommand = bot.registerCommand('embed', (msg, args) => {
+// Embed command
+bot.registerCommand('embed', (msg, args) => {
   msg.delete()
   var args = msg.content.split(' ').slice(1).join(' ').split(' | ')
   var title = args[0]
@@ -512,181 +910,6 @@ var embedCommand = bot.registerCommand('embed', (msg, args) => {
   description: 'Create an Embed.',
   fullDescription: 'Create an Embed.',
   usage: '<title> | <content>'
-})
-
-embedCommand.registerSubcommand('warning', (msg, args) => {
-  msg.delete()
-  var args = msg.content.split(' ').slice(2).join(' ').split(' | ')
-  var title = args[0]
-  var desc = args[1]
-  var rando = Math.floor((Math.random() * 14) + 1)
-  var colour = '16776960'
-  var newrando = rando - 1
-  var info = informations[newrando]
-  var newinfo = info.split('').reverse().join('')
-  var foot = newinfo
-  bot.createMessage(msg.channel.id, {
-    embed: {
-      color: colour,
-      title: title,
-      description: desc,
-      author: {
-        name: msg.author.username,
-        icon_url: msg.author.avatarURL
-      },
-      thumbnail: {
-        url: `http://www.clker.com/cliparts/5/6/f/3/11971252291061148562zeimusu_Warning_notification.svg.hi.png`
-      },
-      footer: {
-        icon_url: bot.user.avatarURL,
-        text: foot
-      }
-    }
-  })
-}, {
-  description: 'Warning embed',
-  fullDescription: 'Warning embed',
-  usage: ' '
-})
-
-embedCommand.registerSubcommand('update', (msg, args) => {
-  msg.delete()
-  var args = msg.content.split(' ').slice(2).join(' ').split(' | ')
-  var title = args[0]
-  var desc = args[1]
-  var rando = Math.floor((Math.random() * 14) + 1)
-  var colour = '65280'
-  var newrando = rando - 1
-  var info = informations[newrando]
-  var newinfo = info.split('').reverse().join('')
-  var foot = newinfo
-  bot.createMessage(msg.channel.id, {
-    embed: {
-      color: colour,
-      title: title,
-      description: desc,
-      author: {
-        name: msg.author.username,
-        icon_url: msg.author.avatarURL
-      },
-      thumbnail: {
-        url: `https://imicrothinking.files.wordpress.com/2009/10/refreshicontrans.png`
-      },
-      footer: {
-        icon_url: bot.user.avatarURL,
-        text: foot
-      }
-    }
-  })
-}, {
-  description: 'Update embed',
-  fullDescription: 'Update embed',
-  usage: ' '
-})
-
-embedCommand.registerSubcommand('lock', (msg, args) => {
-  msg.delete()
-  var args = msg.content.split(' ').slice(2).join(' ').split(' | ')
-  var title = args[0]
-  var desc = args[1]
-  var rando = Math.floor((Math.random() * 14) + 1)
-  var colour = '16776960'
-  var newrando = rando - 1
-  var info = informations[newrando]
-  var newinfo = info.split('').reverse().join('')
-  var foot = newinfo
-  bot.createMessage(msg.channel.id, {
-    embed: {
-      color: colour,
-      title: title,
-      description: desc,
-      author: {
-        name: msg.author.username,
-        icon_url: msg.author.avatarURL
-      },
-      thumbnail: {
-        url: `https://vignette3.wikia.nocookie.net/thelastofus/images/9/96/Lock.png/revision/latest?cb=20150811200030`
-      },
-      footer: {
-        icon_url: bot.user.avatarURL,
-        text: foot
-      }
-    }
-  })
-}, {
-  description: 'Lock embed',
-  fullDescription: 'Lock embed',
-  usage: ' '
-})
-
-embedCommand.registerSubcommand('ping', (msg, args) => {
-  msg.delete()
-  var args = msg.content.split(' ').slice(2).join(' ').split(' | ')
-  var title = args[0]
-  var desc = args[1]
-  var rando = Math.floor((Math.random() * 14) + 1)
-  var colour = '16776960'
-  var newrando = rando - 1
-  var info = informations[newrando]
-  var newinfo = info.split('').reverse().join('')
-  var foot = newinfo
-  bot.createMessage(msg.channel.id, {
-    embed: {
-      color: colour,
-      title: title,
-      description: desc,
-      author: {
-        name: msg.author.username,
-        icon_url: msg.author.avatarURL
-      },
-      thumbnail: {
-        url: `https://cdn.discordapp.com/attachments/271648451647766528/351842874398212098/339555345095589889.png`
-      },
-      footer: {
-        icon_url: bot.user.avatarURL,
-        text: foot
-      }
-    }
-  })
-}, {
-  description: 'Ping embed',
-  fullDescription: 'Ping embed',
-  usage: ' '
-})
-
-embedCommand.registerSubcommand('idea', (msg, args) => {
-  msg.delete()
-  var args = msg.content.split(' ').slice(2).join(' ').split(' | ')
-  var title = args[0]
-  var desc = args[1]
-  var rando = Math.floor((Math.random() * 14) + 1)
-  var colour = '65280'
-  var newrando = rando - 1
-  var info = informations[newrando]
-  var newinfo = info.split('').reverse().join('')
-  var foot = newinfo
-  bot.createMessage(msg.channel.id, {
-    embed: {
-      color: colour,
-      title: title,
-      description: desc,
-      author: {
-        name: msg.author.username,
-        icon_url: msg.author.avatarURL
-      },
-      thumbnail: {
-        url: `https://sites.google.com/site/nbsplusmika/_/rsrc/1495708818997/gmotes/miidea.png`
-      },
-      footer: {
-        icon_url: bot.user.avatarURL,
-        text: foot
-      }
-    }
-  })
-}, {
-  description: 'Idea embed',
-  fullDescription: 'Idea embed',
-  usage: ' '
 })
 
 bot.connect()
