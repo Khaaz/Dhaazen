@@ -1,6 +1,7 @@
 const Eris = require('eris')
 const config = require('./config.json')
 const { exec } = require('child_process')
+const { inspect } = require('util')
 
 // CommandClient
 var bot = new Eris.CommandClient(config.token, {}, {
@@ -23,20 +24,24 @@ bot.on('ready', () => { // When the bot is ready
 })
 
 bot.on('ready', () => {
-  bot.createMessage('361524475621277696', {
+  bot.createMessage('361524475621277696', { // uptime channel
     embed: {
       timestamp: new Date(),
-      color: 2067276,
+      color: 2067276, // Dark green
       description: '**Online!**'
     }
   })
 })
 
+process.on('uncaughtException', (err) => {
+  console.log(`An error occured: ${err}`)
+})
+
 bot.on('error', (err, msg) => {
-  bot.createMessage('361605085572104203', {
+  bot.createMessage('361605085572104203', { // error channel
     embed: {
       timestamp: new Date(),
-      color: 10038562,
+      color: 10038562, // Dark red
       description: `An Error occured.\n${err}`
     }
   })
@@ -44,10 +49,10 @@ bot.on('error', (err, msg) => {
 })
 
 bot.on('warn', (msg) => {
-  bot.createMessage('361605104371236867', {
+  bot.createMessage('361605085572104203', { // error channel
     embed: {
       timestamp: new Date(),
-      color: 11027200,
+      color: 11027200, // Dark orange
       description: `${msg}`
     }
   })
@@ -56,81 +61,283 @@ bot.on('warn', (msg) => {
 //
 //
 
-// CORE STUFF
+// CORE STUFF - Global var
 //
-var version = 'V 1.x Dev; private release for Khaaz'
-var codeblock = '\u0060\u0060\u0060'
-var informations = ['0892#.K akiM yb tobmE htiw detaerc', 'etivni/ten.tobonyd//:sptth :tob eno-ni-lla tseb eht - yadot tobonyD yrT', '!snoitcnuf erom rof toB ytrilF teG', ".htlaeh ruoy rof ,kaerb a ekaT !CP ruoy no emit hcum oot dneps t'noD :ofnI", ')lol( DNUOF TON OFNI 404 :ofnI', '?thgir ,ydaerla taht wenk uoy tuB .tob tseb tobmE :ofnI', 'tobme/akimsulpsbn/etis/moc.elgoog.setis//:sptth :tuo siht kcehC ?tobmE ekiL', "!htlaeh ruoy rof doog ton si gnikomS .trats t'nod - trams eB :ofnI", "!erawlam llatsni dluoc yeht ,drocsiD no sknil modnar kcilc t'noD", '!ipa-drocsid/gg.drocsid ot oG ?stoB htiw pleh deeN', 'ecnaraeppA rednu sgnitteS drocsiD ruoy ni edom repoleveD elbanE :ofnI', ')edom repoleveD htiw( DI ypoc tceles dna eman lennahc eht kcilc-thgir ,drocsiD ni lennahc a fo DI eht teg oT :ofnI', ')edom repoleveD htiw( DI ypoc tceles dna eman lennahc eht kcilc-thgir ,drocsiD ni lennahc a fo DI eht teg oT :ofnI', ')edom repoleveD htiw( DI ypoc tceles dna eman lennahc eht kcilc-thgir ,drocsiD ni lennahc a fo DI eht teg oT :ofnI', '!ecivreS fo smreT drocsiD eht yb detibihorp si tnuocca resu a no tob a gninnuR :ofnI', '!drocsiD sgniht lla htiw pleh dnif uoy buh/gg.drocsid tA ?tsol gnileeF :ofnI', 'Baum']// 14 infos//
+var version = 'Embot V 1.x Dev; private release for Khaaz | Dhaazen: Alpha 0.5 Dev'
+var dprefix = `k`
 //
 // CORE STUFF END
 
 // HELP COMMAND
 //
-var dprefix = 'k'
-
 bot.registerCommand('help', (msg, args) => {
   var result = ''
-  if (args.length > 0) {
-    var cur = bot.commands[bot.commandAliases[args[0]] || args[0]]
-    if (!cur) {
+  if (args.length > 0) { // check arg
+    var cmd = bot.commands[bot.commandAliases[args[0]] || args[0]] // cmd = commande
+    if (!cmd) { // check !cmd
       return ':no_entry_sign: Command not found'
-    }
-    var label = cur.label
-    for (var i = 1; i < args.length; ++i) {
-      cur = cur.subcommands[cur.subcommandAliases[args[i]] || args[i]]
-      if (!cur) {
-        return ':no_entry_sign: Command not found'
+    } else { // check cmd
+      var label = cmd.label // label = cmd
+      for (var i = 1; i < args.length; ++i) {
+        cmd = cmd.subcommands[cmd.subcommandAliases[args[i]] || args[i]] // cmd = subcmd
+        label += ' ' + cmd.label // label =cmd subcmd
+        if (!cmd) { // check !cmd
+          return ':no_entry_sign: Subcommand not found'
+        }
       }
-      label += ' ' + cur.label
-    }
-    result += `**Command:** [${dprefix}${label}]() \n**Usage:** ${cur.usage}\n**Description:** ${cur.fullDescription}`
-    if (Object.keys(cur.aliases).length > 0) {
-      result += `\n\n**Aliases:** ${cur.aliases.join(', ')}`
-    }
-    if (Object.keys(cur.subcommands).length > 0) {
-      result += '\n\n**Subcommands:**'
-      for (var subLabel in cur.subcommands) {
-        if (cur.subcommands[subLabel].permissionCheck(msg)) {
-          result += `\n  **${subLabel}** - ${cur.subcommands[subLabel].description}`
+      if (cmd) { // check cmd
+        if (cmd.parentCommand) { // if is subcommands
+          if (Object.keys(cmd.aliases).length > 0) { // if has aliases
+            bot.createMessage(msg.channel.id, { // print subcmd + aliases
+              embed: {
+                color: 3066993, // green
+                timestamp: new Date(),
+                author: {
+                  name: 'Commands',
+                  icon_url: bot.user.dynamicAvatarURL('png')
+                },
+                footer: {
+                  text: 'Dhaazen'
+                },
+                fields: [
+                  {
+                    name: `**SubCommand:**`,
+                    value: `\u0000[${msg.prefix}${label}]()`,
+                    inline: true
+                  },
+                  {
+                    name: `**Aliases:**`,
+                    value: `${cmd.aliases.join(', ')}`,
+                    inline: true
+                  },
+                  {
+                    name: `**Description:**`,
+                    value: `${cmd.fullDescription}`
+                  },
+                  {
+                    name: `**Usage:**`,
+                    value: `\`${cmd.usage}\``
+                  }
+                ]
+              }
+            })
+          } else { // if has not alias
+            bot.createMessage(msg.channel.id, { // print subcmd
+              embed: {
+                color: 3066993, // green
+                timestamp: new Date(),
+                author: {
+                  name: 'Commands',
+                  icon_url: bot.user.dynamicAvatarURL('png')
+                },
+                footer: {
+                  text: 'Dhaazen'
+                },
+                fields: [
+                  {
+                    name: `**SubCommand:**`,
+                    value: `\u0000[${msg.prefix}${label}]()`
+                  },
+                  {
+                    name: `**Description:**`,
+                    value: `${cmd.fullDescription}`
+                  },
+                  {
+                    name: `**Usage:**`,
+                    value: `\`${cmd.usage}\``
+                  }
+                ]
+              }
+            })
+          }
+        } else { // if is not !subcmd
+          if (Object.keys(cmd.aliases).length > 0) { // if has aliases
+            if (Object.keys(cmd.subcommands).length > 0) { // if has subcommands
+              for (var subLabel in cmd.subcommands) {
+                if (cmd.subcommands[subLabel].permissionCheck(msg)) {
+                  result += `\n  **${subLabel}** - ${cmd.subcommands[subLabel].description}`
+                  bot.createMessage(msg.channel.id, { // print cmd + aliases + subcmdlist
+                    embed: {
+                      color: 3066993, // green
+                      timestamp: new Date(),
+                      author: {
+                        name: 'Commands',
+                        icon_url: bot.user.dynamicAvatarURL('png')
+                      },
+                      footer: {
+                        text: 'Dhaazen'
+                      },
+                      fields: [
+                        {
+                          name: `**Command:**`,
+                          value: `\u0000[${msg.prefix}${label}]()`,
+                          inline: true
+                        },
+                        {
+                          name: `**Aliases:**`,
+                          value: `${cmd.aliases.join(', ')}`,
+                          inline: true
+                        },
+                        {
+                          name: `**Description:**`,
+                          value: `${cmd.fullDescription}`
+                        },
+                        {
+                          name: `**Usage:**`,
+                          value: `\`${cmd.usage}\``
+                        },
+                        {
+                          name: `**Subcommand:**`,
+                          value: result
+                        }
+                      ]
+                    }
+                  })
+                }
+              }
+            } else { // if has not subcmd
+              bot.createMessage(msg.channel.id, { // print cmd + aliases
+                embed: {
+                  color: 3066993, // green
+                  timestamp: new Date(),
+                  author: {
+                    name: 'Commands',
+                    icon_url: bot.user.dynamicAvatarURL('png')
+                  },
+                  footer: {
+                    text: 'Dhaazen'
+                  },
+                  fields: [
+                    {
+                      name: `**Command:**`,
+                      value: `\u0000[${msg.prefix}${label}]()`,
+                      inline: true
+                    },
+                    {
+                      name: `**Aliases:**`,
+                      value: `${cmd.aliases.join(', ')}`,
+                      inline: true
+                    },
+                    {
+                      name: `**Description:**`,
+                      value: `${cmd.fullDescription}`
+                    },
+                    {
+                      name: `**Usage:**`,
+                      value: `\`${cmd.usage}\``
+                    }
+                  ]
+                }
+              })
+            }
+          } else { // if has not alias
+            if (Object.keys(cmd.subcommands).length > 0) { // if has subcommands
+              for (var subLabel in cmd.subcommands) {
+                if (cmd.subcommands[subLabel].permissionCheck(msg)) {
+                  result += `\n  **${subLabel}** - ${cmd.subcommands[subLabel].description}`
+                  bot.createMessage(msg.channel.id, { // print cmd + subcmdlist
+                    embed: {
+                      color: 3066993, // green
+                      timestamp: new Date(),
+                      author: {
+                        name: 'Commands',
+                        icon_url: bot.user.dynamicAvatarURL('png')
+                      },
+                      footer: {
+                        text: 'Dhaazen'
+                      },
+                      fields: [
+                        {
+                          name: `**Command:**`,
+                          value: `\u0000[${msg.prefix}${label}]()`,
+                          inline: true
+                        },
+                        {
+                          name: `**Description:**`,
+                          value: `${cmd.fullDescription}`
+                        },
+                        {
+                          name: `**Usage:**`,
+                          value: `\`${cmd.usage}\``
+                        },
+                        {
+                          name: `**Subcommand:**`,
+                          value: result
+                        }
+                      ]
+                    }
+                  })
+                }
+              }
+            } else { // if has not subcmd
+              bot.createMessage(msg.channel.id, { // print cmd
+                embed: {
+                  color: 3066993, // green
+                  timestamp: new Date(),
+                  author: {
+                    name: 'Commands',
+                    icon_url: bot.user.dynamicAvatarURL('png')
+                  },
+                  footer: {
+                    text: 'Dhaazen'
+                  },
+                  fields: [
+                    {
+                      name: '**Command:**',
+                      value: `\u0000[${msg.prefix}${label}]()`
+                    },
+                    {
+                      name: '**Description:**',
+                      value: `${cmd.fullDescription}`
+                    },
+                    {
+                      name: '**Usage:**',
+                      value: `\`${cmd.usage}\``
+                    }
+                  ]
+                }
+              })
+            }
+          }
         }
       }
     }
   } else {
-    result += `${bot.commandOptions.name} - ${bot.commandOptions.description}\n`
-    if (bot.commandOptions.owner) {
-      result += `by ${bot.commandOptions.owner}\n`
-    }
-    result += '\n'
-    result += '**Commands:**\n'
-    for (label in bot.commands) {
+    result += '\u0000'
+    for (var label in bot.commands) {
       if (bot.commands[label] && bot.commands[label].permissionCheck(msg)) {
-        result += `  [${dprefix}${label}]() - ${bot.commands[label].description}\n`
+        result += `  [${msg.prefix}${label}]() - ${bot.commands[label].description}\n`
       }
     }
-    var footer = `\nType ${dprefix}help <command> for more info on a command.`
+    bot.createMessage(msg.channel.id, { // help global
+      embed: {
+        color: 3066993, // green
+        author: {
+          name: 'Commands',
+          icon_url: bot.user.dynamicAvatarURL('png')
+        },
+        footer: {
+          text: `Type ${dprefix}help <command> for help about a command.`
+        },
+        fields: [
+          {
+            name: 'Dhaazen',
+            value: `Author: \`KhaaZ#2030\`.\nVersion:\`${version}\`.\nMore info: \`${dprefix}info\`.`
+          },
+          {
+            name: 'Commands',
+            value: result
+          },
+          {
+            name: 'Prefix',
+            value: `\`${dprefix}\`\n\`@Dhaazen#6393 \``
+          }
+        ]
+      }
+    })
   }
-  var rando = (function co (lor) {
-    return (lor +=
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9][Math.floor(Math.random() * 10)]) &&
-                (lor.length == 7) ? lor : co(lor)
-  })('')
-  bot.createMessage(msg.channel.id, {
-    'embed': {
-      'color': 3066993,
-      'description': result,
-      'author': {
-        'name': 'Commands',
-        'icon_url': bot.user.dynamicAvatarURL('png')
-      },
-      'footer': {
-        'text': footer
-      }
-    }
-  }).catch((err) => {
-    console.log(err)
-  })
 }, {
-  description: 'This help text',
+  description: 'Help command',
   fullDescription: 'This command is used to view information of different bot commands, including this one.',
   usage: `\n${dprefix}help\n${dprefix}help <command>`
 })
@@ -141,27 +348,27 @@ bot.registerCommandAlias('halp', 'help') // Alias !halp to !help
 
 // PRIVATE COMMANDS
 //
-// Restart | Eval
+// Restart | Botstop | Eval
 //
 // Restart command
 bot.registerCommand('restart', (msg, args) => {
-  if (msg.author.id === '179908288337412096') { // USER ID HERE!
+  if (msg.author.id === '179908288337412096') { // Owner ID
     msg.delete()
     bot.createMessage(msg.channel.id, {
       embed: {
-        color: 3066993,
+        color: 3066993, // green
         description: 'Restarting...'
       }
     })
       .then(msg => {
         setTimeout(function () {
           msg.delete()
-        }, 5000)
+        }, 3000)
       })
-    bot.createMessage('361524475621277696', {
+    bot.createMessage('361524475621277696', { // uptime channel
       embed: {
         timestamp: new Date(),
-        color: 3066993,
+        color: 3066993, // green
         description: '==> Restarting!'
       }
     })
@@ -177,13 +384,16 @@ bot.registerCommand('restart', (msg, args) => {
       bot.createMessage(msg.channel.id, {
         embed: {
           timestamp: new Date(),
-          color: 3066993,
+          color: 3066993, // green
+          footer: {
+            icon_url: bot.user.avatarURL,
+            text: 'Dhaazen'
+          },
           description: 'Restarted!'
         }
       })
-    }, 6000)
-  }
-  if (msg.author.id !== '179908288337412096') { // USER ID HERE!
+    }, 4000)
+  } else {
     bot.createMessage(msg.channel.id, ':no_entry_sign: Sorry, restart is not available for you.')
   }
 }, {
@@ -191,49 +401,104 @@ bot.registerCommand('restart', (msg, args) => {
   fullDescription: 'Restart the bot',
   usage: `${dprefix}restart`,
   requirements: {
-    'userIDs': '179908288337412096'
+    'userIDs': '179908288337412096' // Owner private
   },
   permissionMessage: ':no_entry_sign: You dont have permission to do that.'
 })
-// Eval command
-bot.registerCommand('eval', (msg, args) => {
-  if (msg.author.id === '179908288337412096') { // USER ID HERE!
-    var code = args.join(' ')
-    var evaled = eval(code)
-    var rando = Math.floor((Math.random() * 14) + 1)
-    var newrando = rando - 1
-    var info = informations[newrando]
-    var newinfo = info.split('').reverse().join('')
-    var foot = newinfo
+// Stop command
+bot.registerCommand('botstop', (msg, args) => {
+  if (msg.author.id === '179908288337412096') { // Owner ID
+    msg.delete()
+    bot.disconnect()
     bot.createMessage(msg.channel.id, {
       embed: {
-        color: 10038562,
-        title: 'EVAL',
-        description: `Your eval resulted in this:\n${codeblock}fix\n${evaled}\n${codeblock}`,
-        author: {
-          name: msg.author.username,
-          icon_url: msg.author.avatarURL
-        },
-        footer: {
-          icon_url: bot.user.avatarURL,
-          text: foot
-        }
+        color: 15158332, // red
+        description: 'Stopping...'
       }
-    }).catch((err) => {
-      console.log(err)
     })
-  }
-  if (msg.author.id !== '179908288337412096') { // USER ID HERE!
-    bot.createMessage(msg.channel.id, ':no_entry_sign: Sorry, eval is not available for you.')
+    .then(msg => {
+      setTimeout(function () {
+        msg.delete()
+      }, 3000)
+    })
+    setTimeout(function () {
+      exec('pm2 stop DhaazenBot', (error, stdout, stderr) => {
+        if (error) {
+          console.error(`exec error: ${error}`)
+          return
+        }
+        console.log(`stdout: ${stdout}`)
+        console.log(`stderr: ${stderr}`)
+      })
+      bot.createMessage(msg.channel.id, {
+        embed: {
+          timestamp: new Date(),
+          color: 15158332, // red
+          footer: {
+            icon_url: bot.user.avatarURL,
+            text: 'Dhaazen'
+          },
+          description: 'Stopped!'
+        }
+      })
+      bot.createMessage('361524475621277696', { // uptime channel
+        embed: {
+          timestamp: new Date(),
+          color: 10038562, // Dark red
+          description: 'Stopped!'
+        }
+      })
+    }, 4000)
+  } else {
+    bot.createMessage(msg.channel.id, ':no_entry_sign: Sorry, botstop is not available for you.')
   }
 }, {
-  description: 'Eval command',
-  fullDescription: 'Eval command',
-  usage: `${dprefix}eval`,
+  description: 'Stop the bot',
+  fullDescription: 'Stop the bot',
+  usage: `${dprefix}botstop`,
   requirements: {
-    'userIDs': '179908288337412096'
+    'userIDs': '179908288337412096' // Owner private
   },
   permissionMessage: ':no_entry_sign: You dont have permission to do that.'
+})
+
+bot.registerCommandAlias('bstop', 'botstop')
+// Eval command
+bot.registerCommand('eval', async (msg, args) => {
+  let avatar = msg.author.defaultAvatarURL
+  if (msg.author.avatar) avatar = `https://cdn.discordapp.com/avatars/${msg.author.id}/${msg.author.avatar}.${msg.author.avatar.startsWith('a_') ? 'gif' : 'png'}?size=2048`
+  let evaled = await eval(args.join(' '))
+  switch (typeof evaled) {
+    case 'object':
+      evaled = inspect(evaled, { depth: 0 })
+      break
+    default:
+      evaled = String(evaled)
+  }
+  bot.createMessage(msg.channel.id, {
+    embed: {
+      color: 3447003,
+      title: 'EVAL',
+      description: `Your eval resulted in this:\n\`\`\`fix\n${evaled}\n\`\`\``,
+      author: {
+        name: msg.author.username,
+        icon_url: avatar
+      },
+      footer: {
+        icon_url: bot.user.dynamicAvatarURL('png'),
+        text: 'Dhaazen | Eval Command'
+      }
+    }
+  }).catch(console.log)
+}, {
+  description: 'Make the bot evaluate js code.',
+  fullDescription: 'Make the bot evaluate js code.',
+  usage: `${dprefix}eval <js>`,
+  requirements: {
+    'userIDs': '179908288337412096' // Owner private
+  },
+  permissionMessage: ':no_entry_sign: Sorry, eval is not available for you.',
+  cooldown: null
 })
 
 bot.registerCommandAlias('e', 'eval')
@@ -245,24 +510,15 @@ bot.registerCommandAlias('e', 'eval')
 // GlobalLog
 //
 bot.on('guildCreate', (guild) => { // Log create guild
+  var owner = guild.members.find(member => member.user.id === guild.ownerID).user
   var dateC = new Date(guild.createdAt)
-  var dateCreated = ''
-  dateCreated += dateC.getUTCMonth() + 1 + ', '
-  dateCreated += dateC.getUTCDate() + ', '
-  dateCreated += dateC.getUTCFullYear() + ' at '
-  dateCreated += dateC.getUTCHours() + 2 + ' h, '
-  dateCreated += dateC.getUTCMinutes() + ' min'
+  dateC = dateC.toUTCString()
   var dateJ = new Date(guild.joinedAt)
-  var dateJoined = ''
-  dateJoined += dateJ.getUTCMonth() + 1 + ', '
-  dateJoined += dateJ.getUTCDate() + ', '
-  dateJoined += dateJ.getUTCFullYear() + ' at '
-  dateJoined += dateJ.getUTCHours() + 2 + 'h, '
-  dateJoined += dateJ.getUTCMinutes() + 'min'
+  dateJ = dateJ.toUTCString()
   bot.createMessage('361246399922307073', {
     embed: {
       timestamp: new Date(),
-      color: 3066993,
+      color: 3066993, // green
       author: {
         name: `${guild.name}`,
         icon_url: `${guild.iconURL}`
@@ -278,24 +534,22 @@ bot.on('guildCreate', (guild) => { // Log create guild
       fields: [
         {
           name: 'ID:',
-          value: `${guild.id}`
-        },
-        {
-          name: 'Region:',
-          value: `${guild.region}`
-        },
-        {
-          name: 'Owner:',
-          value: `${guild.ownerID}`
-        },
-        {
-          name: 'Created at:',
-          value: `${dateCreated}`,
+          value: `${guild.id}`,
           inline: true
         },
         {
-          name: 'Joined at:',
-          value: `${dateJoined}`,
+          name: 'Region:',
+          value: `${guild.region}`,
+          inline: true
+        },
+        {
+          name: 'Owner:',
+          value: `${owner.username + '#' + owner.discriminator}`,
+          inline: true
+        },
+        {
+          name: 'Owner ID:',
+          value: `${guild.ownerID}`,
           inline: true
         },
         {
@@ -307,6 +561,14 @@ bot.on('guildCreate', (guild) => { // Log create guild
           name: 'Channels:',
           value: `${guild.channels.size}`,
           inline: true
+        },
+        {
+          name: 'Created at:',
+          value: `${dateC}`
+        },
+        {
+          name: 'Joined at:',
+          value: `${dateJ}`
         }
       ]
     }
@@ -314,24 +576,15 @@ bot.on('guildCreate', (guild) => { // Log create guild
 })
 
 bot.on('guildDelete', (guild) => { // Log delete guild
+  var owner = guild.members.find(member => member.user.id === guild.ownerID).user
   var dateC = new Date(guild.createdAt)
-  var dateCreated = ''
-  dateCreated += dateC.getUTCMonth() + 1 + ', '
-  dateCreated += dateC.getUTCDate() + ', '
-  dateCreated += dateC.getUTCFullYear() + ' at '
-  dateCreated += dateC.getUTCHours() + 2 + ' h, '
-  dateCreated += dateC.getUTCMinutes() + ' min'
+  dateC = dateC.toUTCString()
   var dateJ = new Date(guild.joinedAt)
-  var dateJoined = ''
-  dateJoined += dateJ.getUTCMonth() + 1 + ', '
-  dateJoined += dateJ.getUTCDate() + ', '
-  dateJoined += dateJ.getUTCFullYear() + ' at '
-  dateJoined += dateJ.getUTCHours() + 2 + 'h, '
-  dateJoined += dateJ.getUTCMinutes() + 'min'
+  dateJ = dateJ.toUTCString()
   bot.createMessage('361246399922307073', {
     embed: {
       timestamp: new Date(),
-      color: 15158332,
+      color: 15158332, // red
       author: {
         name: `${guild.name}`,
         icon_url: `${guild.iconURL}`
@@ -347,24 +600,22 @@ bot.on('guildDelete', (guild) => { // Log delete guild
       fields: [
         {
           name: 'ID:',
-          value: `${guild.id}`
-        },
-        {
-          name: 'Region:',
-          value: `${guild.region}`
-        },
-        {
-          name: 'Owner:',
-          value: `${guild.ownerID}`
-        },
-        {
-          name: 'Created at:',
-          value: `${dateCreated}`,
+          value: `${guild.id}`,
           inline: true
         },
         {
-          name: 'Joined at:',
-          value: `${dateJoined}`,
+          name: 'Region:',
+          value: `${guild.region}`,
+          inline: true
+        },
+        {
+          name: 'Owner:',
+          value: `${owner.username + '#' + owner.discriminator}`,
+          inline: true
+        },
+        {
+          name: 'Owner ID:',
+          value: `${guild.ownerID}`,
           inline: true
         },
         {
@@ -376,6 +627,14 @@ bot.on('guildDelete', (guild) => { // Log delete guild
           name: 'Channels:',
           value: `${guild.channels.size}`,
           inline: true
+        },
+        {
+          name: 'Created at:',
+          value: `${dateC}`
+        },
+        {
+          name: 'Joined at:',
+          value: `${dateJ}`
         }
       ]
     }
@@ -383,24 +642,15 @@ bot.on('guildDelete', (guild) => { // Log delete guild
 })
 
 bot.on('guildAvailable', (guild) => { // Log Available guild
+  var owner = guild.members.find(member => member.user.id === guild.ownerID).user
   var dateC = new Date(guild.createdAt)
-  var dateCreated = ''
-  dateCreated += dateC.getUTCMonth() + 1 + ', '
-  dateCreated += dateC.getUTCDate() + ', '
-  dateCreated += dateC.getUTCFullYear() + ' at '
-  dateCreated += dateC.getUTCHours() + 2 + ' h, '
-  dateCreated += dateC.getUTCMinutes() + ' min'
+  var dateCreated = dateC.toUTCString()
   var dateJ = new Date(guild.joinedAt)
-  var dateJoined = ''
-  dateJoined += dateJ.getUTCMonth() + 1 + ', '
-  dateJoined += dateJ.getUTCDate() + ', '
-  dateJoined += dateJ.getUTCFullYear() + ' at '
-  dateJoined += dateJ.getUTCHours() + 2 + 'h, '
-  dateJoined += dateJ.getUTCMinutes() + 'min'
+  var dateJoined = dateJ.toUTCString()
   bot.createMessage('361246399922307073', {
     embed: {
       timestamp: new Date(),
-      color: 3066993,
+      color: 3066993, // green
       author: {
         name: `${guild.name}`,
         icon_url: `${guild.iconURL}`
@@ -416,24 +666,22 @@ bot.on('guildAvailable', (guild) => { // Log Available guild
       fields: [
         {
           name: 'ID:',
-          value: `${guild.id}`
-        },
-        {
-          name: 'Region:',
-          value: `${guild.region}`
-        },
-        {
-          name: 'Owner:',
-          value: `${guild.ownerID}`
-        },
-        {
-          name: 'Created at:',
-          value: `${dateCreated}`,
+          value: `${guild.id}`,
           inline: true
         },
         {
-          name: 'Joined at:',
-          value: `${dateJoined}`,
+          name: 'Region:',
+          value: `${guild.region}`,
+          inline: true
+        },
+        {
+          name: 'Owner:',
+          value: `${owner.username + '#' + owner.discriminator}`,
+          inline: true
+        },
+        {
+          name: 'Owner ID:',
+          value: `${guild.ownerID}`,
           inline: true
         },
         {
@@ -445,6 +693,14 @@ bot.on('guildAvailable', (guild) => { // Log Available guild
           name: 'Channels:',
           value: `${guild.channels.size}`,
           inline: true
+        },
+        {
+          name: 'Created at:',
+          value: `${dateC}`
+        },
+        {
+          name: 'Joined at:',
+          value: `${dateJ}`
         }
       ]
     }
@@ -452,24 +708,15 @@ bot.on('guildAvailable', (guild) => { // Log Available guild
 })
 
 bot.on('guildUnavailable', (guild) => { // Log Unavailable guild
+  var owner = guild.members.find(member => member.user.id === guild.ownerID).user
   var dateC = new Date(guild.createdAt)
-  var dateCreated = ''
-  dateCreated += dateC.getUTCMonth() + 1 + ', '
-  dateCreated += dateC.getUTCDate() + ', '
-  dateCreated += dateC.getUTCFullYear() + ' at '
-  dateCreated += dateC.getUTCHours() + 2 + ' h, '
-  dateCreated += dateC.getUTCMinutes() + ' min'
+  var dateCreated = dateC.toUTCString()
   var dateJ = new Date(guild.joinedAt)
-  var dateJoined = ''
-  dateJoined += dateJ.getUTCMonth() + 1 + ', '
-  dateJoined += dateJ.getUTCDate() + ', '
-  dateJoined += dateJ.getUTCFullYear() + ' at '
-  dateJoined += dateJ.getUTCHours() + 2 + 'h, '
-  dateJoined += dateJ.getUTCMinutes() + 'min'
+  var dateJoined = dateJ.toUTCString()
   bot.createMessage('361246399922307073', {
     embed: {
       timestamp: new Date(),
-      color: 15158332,
+      color: 15158332, // red
       author: {
         name: `${guild.name}`,
         icon_url: `${guild.iconURL}`
@@ -485,24 +732,22 @@ bot.on('guildUnavailable', (guild) => { // Log Unavailable guild
       fields: [
         {
           name: 'ID:',
-          value: `${guild.id}`
-        },
-        {
-          name: 'Region:',
-          value: `${guild.region}`
-        },
-        {
-          name: 'Owner:',
-          value: `${guild.ownerID}`
-        },
-        {
-          name: 'Created at:',
-          value: `${dateCreated}`,
+          value: `${guild.id}`,
           inline: true
         },
         {
-          name: 'Joined at:',
-          value: `${dateJoined}`,
+          name: 'Region:',
+          value: `${guild.region}`,
+          inline: true
+        },
+        {
+          name: 'Owner:',
+          value: `${owner.username + '#' + owner.discriminator}`,
+          inline: true
+        },
+        {
+          name: 'Owner ID:',
+          value: `${guild.ownerID}`,
           inline: true
         },
         {
@@ -514,6 +759,14 @@ bot.on('guildUnavailable', (guild) => { // Log Unavailable guild
           name: 'Channels:',
           value: `${guild.channels.size}`,
           inline: true
+        },
+        {
+          name: 'Created at:',
+          value: `${dateC}`
+        },
+        {
+          name: 'Joined at:',
+          value: `${dateJ}`
         }
       ]
     }
@@ -535,14 +788,158 @@ if(guild.id==='358685866878566400') {
 //
 // Support | Ping | Invite | Uptime | Membercount | Info | Say:reverse | Announce | version | Embed
 //
+// Ping command
+bot.registerCommand('ping', (msg) => {
+  var startime = bot.startTime
+  let start = Date.now()
+  bot.createMessage(msg.channel.id, {
+    embed: {
+      color: 3066993, // green
+      timestamp: new Date(startime),
+      footer: {
+        icon_url: bot.user.avatarURL,
+        text: 'Started at'
+      },
+      description: '**Pinging...**'
+    }
+  })
+    .then(msg => { // edit + pingtime
+      let diff = (Date.now() - start)
+      return msg.edit({
+        embed: {
+          timestamp: new Date(startime),
+          footer: {
+            icon_url: bot.user.avatarURL,
+            text: 'Started at'
+          },
+          color: 3066993,
+          description: `**Pong!** \`${diff}ms\``
+        }
+      })
+    })
+}, {
+  description: 'Pings the bot.',
+  fullDescription: "This command could be used to check if the bot is up. Or entertainment when you're bored.",
+  usage: `${dprefix}ping`,
+  cooldown: 2000,
+  cooldownMessage: `:no_entry_sign: A little too fast there..`,
+  cooldownReturns: 1
+})
+// Info command
+bot.registerCommand('info', (msg, args) => {
+  var uptime = bot.uptime
+  var startime = bot.startTime
+  var date = new Date(uptime)
+  var str = ''
+  str += date.getUTCDate() - 1 + 'd, '
+  str += date.getUTCHours() + 'h, '
+  str += date.getUTCMinutes() + 'min, '
+  str += date.getUTCSeconds() + 'sec, '
+  bot.createMessage(msg.channel.id, {
+    embed: {
+      color: 1752220, // aqua
+      author: {
+        name: 'Dhaazen',
+        icon_url: bot.user.avatarURL
+      },
+      thumbnail: {
+        url: bot.user.avatarURL
+      },
+      timestamp: new Date(startime),
+      footer: {
+        icon_url: bot.user.avatarURL,
+        text: 'Started at'
+      },
+      fields: [
+        {
+          name: 'Creator',
+          value: 'KhaaZ#2030',
+          inline: false
+        },
+        {
+          name: 'Version',
+          value: `${version}`,
+          inline: true
+        },
+        {
+          name: 'Language/Lib',
+          value: 'javascript/eris',
+          inline: true
+        },
+        {
+          name: 'Description',
+          value: 'Experimental bot using *javascript* and *eris* lib\nBased on the awesome Embot source code by `Mika K.#2980`\nBoosted by the dyno team :sunglasses:',
+          inline: false
+        },
+        {
+          name: 'Contributors',
+          value: '`Mika K.#2980`-Embot source code\n`Ape#7739`-Awesome tips and help\n`AS04™#2793`-Awesome tips and help\n`Zapp#0790`',
+          inline: false
+        },
+        {
+          name: 'Guilds',
+          value: `${bot.guilds.size}`,
+          inline: true
+        },
+        {
+          name: 'Users',
+          value: `${bot.guilds.map(g => g.memberCount).reduce((a, b) => a + b)}`,
+          inline: true
+        },
+        {
+          name: 'Uptime',
+          value: `${str}`,
+          inline: false
+        },
+        {
+          name: 'Invite',
+          value: '[Add me](https://discordapp.com/oauth2/authorize?client_id=360859616558579713&scope=bot&permissions=201714753)',
+          inline: true
+        },
+        {
+          name: 'Discord Server',
+          value: '[Join now](https://discord.gg/JtbEDuf)',
+          inline: true
+        }
+      ]
+    }
+  })
+}, {
+  description: 'Infos about the bot',
+  fullDescription: 'Full infos about the bot',
+  usage: `${dprefix}info`,
+  cooldown: 2000,
+  cooldownMessage: `:no_entry_sign: A little too fast there..`,
+  cooldownReturns: 1
+})
+
+bot.registerCommandAlias('botinfo', 'info')
+// Version command
+bot.registerCommand('version', (msg, args) => { // Info command 2.0
+  bot.createMessage(msg.channel.id, {
+    embed: {
+      color: 1752220,
+      title: 'Version',
+      description: `${version}`
+    }
+  })
+}, {
+  description: 'Bot version',
+  fullDescription: 'Bot version',
+  usage: `${dprefix}version`,
+  cooldown: 2000,
+  cooldownMessage: `:no_entry_sign: A little too fast there..`,
+  cooldownReturns: 1
+})
 // Support command
 bot.registerCommand('support', (msg, args) => { // Info command 2.0
   bot.createMessage(msg.channel.id, {
     embed: {
-      color: 1752220,
+      color: 1752220, // aqua
       timestamp: new Date(),
       footer: {
-        icon_url: bot.user.avatarURL
+        icon_url: bot.user.avatarURL,
+        text: 'Dhaazen'
       },
       author: {
         name: 'Dhaazen',
@@ -566,57 +963,23 @@ bot.registerCommand('support', (msg, args) => { // Info command 2.0
   cooldownMessage: `:no_entry_sign: A little too fast there..`,
   cooldownReturns: 1
 })
-// Ping command
-bot.registerCommand('ping', (msg) => {
-  var startime = bot.startTime
-  let start = Date.now()
-  bot.createMessage(msg.channel.id, {
-    embed: {
-      color: 3066993,
-      timestamp: new Date(startime),
-      footer: {
-        text: 'Started at'
-      },
-      description: '**Pong!**'
-    }
-  })
-    .then(msg => {
-      let diff = (Date.now() - start)
-      return msg.edit({
-        embed: {
-          timestamp: new Date(startime),
-          footer: {
-            text: 'Started at'
-          },
-          color: 3066993,
-          description: `**Pong!** \`${diff}ms\``
-        }
-      })
-    })
-}, {
-  description: 'Pings the bot.',
-  fullDescription: "This command could be used to check if the bot is up. Or entertainment when you're bored.",
-  cooldown: 2000,
-  cooldownMessage: `:no_entry_sign: A little too fast there..`,
-  cooldownReturns: 1
-})
 // Invite command
 bot.registerCommand('invite', (msg, args) => {
   bot.createMessage(msg.channel.id, {
     embed: {
-      color: 1752220,
-      timestamp: new Date(),
+      color: 1752220, // aqua
       author: {
         name: 'Dhaazen',
         icon_url: bot.user.avatarURL
       },
       footer: {
-        incon_url: bot.user.avatarURL
+        icon_url: bot.user.avatarURL,
+        text: 'Support server: https://discord.gg/JtbEDuf'
       },
       fields: [
         {
           name: 'Invite',
-          value: 'Add me to your server!\n[invite me](https://discordapp.com/oauth2/authorize?client_id=360859616558579713&scope=bot&permissions=201714753)',
+          value: '[Add me to your server!](https://discordapp.com/oauth2/authorize?client_id=360859616558579713&scope=bot&permissions=201714753)',
           inline: false
         }
       ]
@@ -643,7 +1006,7 @@ bot.registerCommand('uptime', (msg, args) => {
   str += date.getUTCMilliseconds() + 'ms'
   bot.createMessage(msg.channel.id, {
     embed: {
-      color: 1752220,
+      color: 1752220, // aqua
       fields: [
         {
           name: 'Uptime',
@@ -671,8 +1034,9 @@ bot.registerCommandAlias('up', 'uptime')
 bot.registerCommand('membercount', (msg, args) => {
   bot.createMessage(msg.channel.id, {
     embed: {
-      color: 1752220,
+      color: 1752220, // aqua
       timestamp: new Date(),
+      title: 'Server members',
       fields: [
         {
           name: 'Total',
@@ -702,96 +1066,13 @@ bot.registerCommand('membercount', (msg, args) => {
 })
 
 bot.registerCommandAlias('members', 'membercount')
-// Info command
-bot.registerCommand('info', (msg, args) => {
-  var uptime = bot.uptime
-  var startime = bot.startTime
-  var date = new Date(uptime)
-  var str = ''
-  str += date.getUTCDate() - 1 + 'd, '
-  str += date.getUTCHours() + 'h, '
-  str += date.getUTCMinutes() + 'min, '
-  str += date.getUTCSeconds() + 'sec, '
-  bot.createMessage(msg.channel.id, {
-    embed: {
-      color: 1752220,
-      author: {
-        name: 'Dhaazen',
-        icon_url: bot.user.avatarURL
-      },
-      thumbnail: {
-        url: bot.user.avatarURL
-      },
-      fields: [
-        {
-          name: 'Creator',
-          value: 'KhaaZ#2030',
-          inline: false
-        },
-        {
-          name: 'Description',
-          value: '**Owner:**`KhaaZ#2030`\nExperimental bot using *javascript* and *eris* lib\nBased on the awesome Embot source code by `Mika K.#2980`\nBoosted by the dyno team :sunglasses:',
-          inline: true
-        },
-        {
-          name: 'Contributors',
-          value: '`Mika K.#2980`\n`Ape#7739`\n`AS04™#2793`\n`Zapp#0790`',
-          inline: false
-        },
-        {
-          name: 'Language',
-          value: 'javascript',
-          inline: true
-        },
-        {
-          name: 'Library',
-          value: 'eris',
-          inline: true
-        },
-        {
-          name: 'Guilds',
-          value: `${bot.guilds.size}`,
-          inline: true
-        },
-        {
-          name: 'Unavailable',
-          value: `${bot.unavailableGuilds.size}`,
-          inline: true
-        },
-        {
-          name: 'Users',
-          value: `${bot.guilds.map(g => g.memberCount).reduce((a, b) => a + b)}`,
-          inline: true
-        },
-        {
-          name: 'Uptime',
-          value: `${str}`,
-          inline: true
-        }
-      ],
-      timestamp: new Date(startime),
-      footer: {
-        text: 'Started at'
-      }
-    }
-  })
-}, {
-  description: 'Info about the bot',
-  fullDescription: 'Info about the bot',
-  usage: `${dprefix}info`,
-  cooldown: 2000,
-  cooldownMessage: `:no_entry_sign: A little too fast there..`,
-  cooldownReturns: 1
-})
-
-bot.registerCommandAlias('botinfo', 'info')
 // Say command
 var sayCommand = bot.registerCommand('say', (msg, args) => {
   if (args.length === 0) {
     bot.createMessage(msg.channel.id, {
       embed: {
-        color: 15158332,
-        description: `**Command:** [${dprefix}say]() \n**Usage:** ${dprefix}say <test>\n**Description:** The bot will say whatever is after the command label.`,
+        color: 15158332, // red
+        description: `**Command:** [${msg.prefix}say]() \n**Usage:** ${msg.prefix}say <test>\n**Description:** The bot will say whatever is after the command label.`,
         author: {
           name: 'Commands',
           icon_url: bot.user.dynamicAvatarURL('png')
@@ -804,7 +1085,7 @@ var sayCommand = bot.registerCommand('say', (msg, args) => {
     return text
   }
 }, {
-  description: 'Make the bot say something',
+  description: 'Say something',
   fullDescription: 'The bot will say whatever is after the command label.',
   usage: `${dprefix}say <text>`,
   cooldown: 2000,
@@ -814,10 +1095,10 @@ var sayCommand = bot.registerCommand('say', (msg, args) => {
 // Say:reverse command
 sayCommand.registerSubcommand('reverse', (msg, args) => {
   if (args.length === 0) {
-    bot.createMessage(msg.channel.id, {
+    bot.createMessage(msg.channel.id, { // error: help say reverse
       embed: {
-        color: 15158332,
-        description: `**Command:** [${dprefix}say reverse]() \n**Usage:** ${dprefix}say reverse <test>\n**Description:** The bot will say, in reverse, whatever is after the command label.`,
+        color: 15158332, // red
+        description: `**Command:** [${msg.prefix}say reverse]() \n**Usage:** ${msg.prefix}say reverse <test>\n**Description:** The bot will say, in reverse, whatever is after the command label.`,
         author: {
           name: 'Commands',
           icon_url: bot.user.dynamicAvatarURL('png')
@@ -831,7 +1112,7 @@ sayCommand.registerSubcommand('reverse', (msg, args) => {
     return text
   }
 }, {
-  description: 'Make the bot say something in reverse',
+  description: 'Say something in reverse',
   fullDescription: 'The bot will say, in reverse, whatever is after the command label.',
   usage: `${dprefix}say reverse <text>`,
   cooldown: 2000,
@@ -841,10 +1122,10 @@ sayCommand.registerSubcommand('reverse', (msg, args) => {
 // Announce command
 var announceCommand = bot.registerCommand('announce', (msg, args) => {
   if (args.length === 0) {
-    bot.createMessage(msg.channel.id, {
+    bot.createMessage(msg.channel.id, { // error: help announce
       embed: {
-        color: 15158332,
-        description: `**Command:** [${dprefix}announce]() \n**Usage:** ${dprefix}announce <test>\n**Description:** The bot will announce with embed whatever is after the command label.`,
+        color: 15158332, // red
+        description: `**Command:** [${msg.prefix}announce]() \n**Usage:** ${msg.prefix}announce <test>\n**Description:** The bot will announce with embed whatever is after the command label.`,
         author: {
           name: 'Commands',
           icon_url: bot.user.dynamicAvatarURL('png')
@@ -855,26 +1136,18 @@ var announceCommand = bot.registerCommand('announce', (msg, args) => {
     var text = args.join(' ')
     bot.createMessage(msg.channel.id, {
       embed: {
-        color: 1752220,
+        color: 12370112, // Light grey
         description: text
       }
     })
   }
 }, {
-  description: 'Make the bot announce something with embed',
+  description: 'Announce with embed',
   fullDescription: 'The bot will announce with embed whatever is after the command label.',
   usage: `${dprefix}announce <text>`,
   cooldown: 2000,
   cooldownMessage: `:no_entry_sign: A little too fast there..`,
   cooldownReturns: 1
-})
-// Version command
-bot.registerCommand('version', (msg, args) => { // Info command 2.0
-  bot.createMessage(msg.channel.id, `This Embot is running Embot version ${version}`)
-}, {
-  description: 'View the version of Embot',
-  fullDescription: 'View the version of Embot',
-  usage: ' '
 })
 // Embed command
 bot.registerCommand('embed', (msg, args) => {
@@ -886,9 +1159,6 @@ bot.registerCommand('embed', (msg, args) => {
   var colour = '3447003'// disable this when using the above
   var rando = Math.floor((Math.random() * 14) + 1)
   var newrando = rando - 1
-  var info = informations[newrando]
-  var newinfo = info.split('').reverse().join('')
-  var foot = newinfo
   bot.createMessage(msg.channel.id, {
     embed: {
       color: colour,
@@ -900,7 +1170,7 @@ bot.registerCommand('embed', (msg, args) => {
       },
       footer: {
         icon_url: bot.user.avatarURL,
-        text: foot
+        text: 'Dhaazen | embed'
       }
     }
   }).catch((err) => {
@@ -909,7 +1179,66 @@ bot.registerCommand('embed', (msg, args) => {
 }, {
   description: 'Create an Embed.',
   fullDescription: 'Create an Embed.',
-  usage: '<title> | <content>'
+  usage: `${dprefix}embed <title> | <content>`,
+  cooldown: 2000,
+  cooldownMessage: `:no_entry_sign: A little too fast there..`,
+  cooldownReturns: 1
 })
-
+// Upload emote command
+bot.registerCommand('upload', (msg, args) => {
+  var request = require('request').defaults({ encoding: null })
+  var data = 'clear'
+  var name = 'clear'
+  if (!msg.member.permission.has('manageEmojis')) {
+    return ":no_entry_sign: You don't have permissions to use that command"
+  }
+  if (args.length <= 1) {
+    return ":no_entry_sign: You didn't enter any or not enough information for the emoji upload!"
+  }
+  if (name !== 'clear') {
+    return ':no_entry_sign: An error occured, please try again!'
+  }
+  name = args[0]
+  var url = args[1].startsWith('http')
+  if (url) {
+    var newurl = args[1]
+  } else {
+    var emoji = args[1].split('<:').join('').split('>').join('').split(':')
+    if (emoji.length === 1) {
+      var newurl = 'https://cdn.discordapp.com/emojis/' + emoji[0] + '.png'
+    } else {
+      var newurl = 'https://cdn.discordapp.com/emojis/' + emoji[1] + '.png'
+    }
+  }
+  request.get(newurl, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      data = 'data:' + response.headers['content-type'] + ';base64,' + new Buffer(body).toString('base64')
+      console.log(data)
+    } else {
+      return ':no_entry_sign: An error occured.'
+    }
+  })
+  setTimeout(function () {
+    bot.createGuildEmoji(msg.channel.guild.id, {
+      'name': name,
+      'image': data
+    }, 'Ulixes Emoji command').then(emoji => {
+      name = 'clear'
+      data = 'clear'
+      bot.createMessage(msg.channel.id, `:ok_hand: Added Emoji <:${emoji.name}:${emoji.id}> with the name :${emoji.name}:`)
+    }).catch(err => {
+      name = 'clear'
+      data = 'clear'
+      bot.createMessage(msg.channel.id, `:no_entry_sign: An error occured: ${err}`)
+    })
+  }, 500)
+}, {
+  description: 'Upload emoji with URL | Command by \`Mika K.#2980\`',
+  fullDescription: 'Upload emoji with URL | Command by \`Mika K.#2980\`',
+  usage: `${dprefix}upload <image url> or <nitro emoji>`,
+  cooldown: 2000,
+  cooldownMessage: `:no_entry_sign: A little too fast there..`,
+  cooldownReturns: 1
+})
+//
 bot.connect()
