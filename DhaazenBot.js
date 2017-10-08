@@ -2,6 +2,7 @@ const Eris = require('eris')
 const config = require('./config.json')
 const { exec } = require('child_process')
 const { inspect } = require('util')
+const request = require('request').defaults({ encoding: null })
 
 // CommandClient
 var bot = new Eris.CommandClient(config.token, {}, {
@@ -102,7 +103,7 @@ bot.registerCommand('help', (msg, args) => {
                 fields: [
                   {
                     name: `**SubCommand:**`,
-                    value: `\u0000[${msg.prefix}${label}]()`,
+                    value: `[${msg.prefix}${label}]()`,
                     inline: true
                   },
                   {
@@ -136,7 +137,7 @@ bot.registerCommand('help', (msg, args) => {
                 fields: [
                   {
                     name: `**SubCommand:**`,
-                    value: `\u0000[${msg.prefix}${label}]()`
+                    value: `[${msg.prefix}${label}]()`
                   },
                   {
                     name: `**Description:**`,
@@ -170,7 +171,7 @@ bot.registerCommand('help', (msg, args) => {
                       fields: [
                         {
                           name: `**Command:**`,
-                          value: `\u0000[${msg.prefix}${label}]()`,
+                          value: `[${msg.prefix}${label}]()`,
                           inline: true
                         },
                         {
@@ -210,7 +211,7 @@ bot.registerCommand('help', (msg, args) => {
                   fields: [
                     {
                       name: `**Command:**`,
-                      value: `\u0000[${msg.prefix}${label}]()`,
+                      value: `[${msg.prefix}${label}]()`,
                       inline: true
                     },
                     {
@@ -249,7 +250,7 @@ bot.registerCommand('help', (msg, args) => {
                       fields: [
                         {
                           name: `**Command:**`,
-                          value: `\u0000[${msg.prefix}${label}]()`,
+                          value: `[${msg.prefix}${label}]()`,
                           inline: true
                         },
                         {
@@ -284,7 +285,7 @@ bot.registerCommand('help', (msg, args) => {
                   fields: [
                     {
                       name: '**Command:**',
-                      value: `\u0000[${msg.prefix}${label}]()`
+                      value: `[${msg.prefix}${label}]()`
                     },
                     {
                       name: '**Description:**',
@@ -303,7 +304,7 @@ bot.registerCommand('help', (msg, args) => {
       }
     }
   } else {
-    result += '\u0000'
+    result += '\u200b'
     for (var label in bot.commands) {
       if (bot.commands[label] && bot.commands[label].permissionCheck(msg)) {
         result += `  [${msg.prefix}${label}]() - ${bot.commands[label].description}\n`
@@ -784,6 +785,38 @@ if(guild.id==='358685866878566400') {
 */
 // LOGS END
 
+// AUTORESPONDER (disabled)
+//
+/*
+bot.on('messageCreate', (msg) => {
+  if (msg.author.bot) return
+  else {
+    if (msg.content === 'Hai' || msg.content === 'hai' || msg.content === 'ayy' || msg.content === 'ayyy') {
+      bot.createMessage(msg.channel.id, 'ayy lmao')
+    }
+    if (msg.content === 'bancoal' || msg.content === 'Bancoal' || msg.content === 'ban coal' || msg.content === 'Ban coal' || msg.content === 'ban Coal' || msg.content === 'Ban Coal') {
+      bot.createMessage(msg.channel.id, '<:bancoal:361845273863127040>')
+    }
+  }
+})
+bot.on('messageCreate', (msg) => {
+  if (msg.author.bot) return
+  else {
+    if (msg.content.includes('<@360859616558579713>') || msg.content.includes('Dhaazen') || msg.content.includes('<@!360859616558579713>')) {
+      msg.channel.addMessageReaction(msg.id, 'hi:361232073853370378', '@me')
+    }
+    if (msg.content.includes('<@179908288337412096>') || msg.content.includes('KhaaZ') || msg.content.includes('khaaz') || msg.content.includes('Khaaz') || msg.content.includes('<@!179908288337412096>')) {
+      msg.channel.addMessageReaction(msg.id, '🚫', '@me')
+    }
+    if (msg.content.includes('<@155698776512790528>') || msg.content.includes('<@!155698776512790528>')) {
+      msg.channel.addMessageReaction(msg.id, 'bancoal:361845273863127040', '@me')
+    }
+  }
+})
+*/
+//
+// AUTORESPONDER END
+
 // BASE COMMANDS
 //
 // Support | Ping | Invite | Uptime | Membercount | Info | Say:reverse | Announce | version | Embed
@@ -1186,7 +1219,6 @@ bot.registerCommand('embed', (msg, args) => {
 })
 // Upload emote command
 bot.registerCommand('upload', (msg, args) => {
-  var request = require('request').defaults({ encoding: null })
   var data = 'clear'
   var name = 'clear'
   if (!msg.member.permission.has('manageEmojis')) {
@@ -1235,7 +1267,7 @@ bot.registerCommand('upload', (msg, args) => {
 }, {
   description: 'Upload emoji with URL | Command by \`Mika K.#2980\`',
   fullDescription: 'Upload emoji with URL | Command by \`Mika K.#2980\`',
-  usage: `${dprefix}upload <image url> or <nitro emoji>`,
+  usage: `${dprefix}upload <name> <image url>/<nitro emoji>`,
   cooldown: 2000,
   cooldownMessage: `:no_entry_sign: A little too fast there..`,
   cooldownReturns: 1
