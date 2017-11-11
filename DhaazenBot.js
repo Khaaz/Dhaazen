@@ -1286,7 +1286,7 @@ bot.registerCommand('fr', (msg, args) => {
         description: `${request}`,
         author: {
           name: `Requested by ${msg.author.username}#${msg.author.discriminator}`,
-          icon_url: msg.author.avatar
+          icon_url: msg.author.avatarURL
         }
       }
     });
