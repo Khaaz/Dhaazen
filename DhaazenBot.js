@@ -1275,18 +1275,25 @@ bot.registerCommand('upload', (msg, args) => {
 
 bot.registerCommand('fr', (msg, args) => {
   let request = args.join(' ')
-  bot.createMessage(378336643247243295, {
-    embed: {
-      timestamp: new Date(),
-      title: `Requested in: ${msg.channel.guild.name}`,
-      thumbnail: `${msg.channel.guild.iconURL}`,
-      description: `${request}`,
-      author: {
-        name: `Requested by ${msg.author.username}#${msg.author.discriminator}`,
-        icon_url: msg.author.avatar
+  try {
+    bot.createMessage(378336643247243295, {
+      embed: {
+        timestamp: new Date(),
+        title: `Requested in: ${msg.channel.guild.name}`,
+        thumbnail: {
+          url: `${msg.channel.guild.iconURL}`,
+        },
+        description: `${request}`,
+        author: {
+          name: `Requested by ${msg.author.username}#${msg.author.discriminator}`,
+          icon_url: msg.author.avatar
+        }
       }
-    }
-  })
+    })
+    bot.createMessage(msg.channel.id, "<:success:372785537221787658> Your feature request was successfully submited")
+  } catch (err)
+    bot.createMessage(378336643247243295, "<:error:372786041637306368> An error occured");
+    bot.createMessage(msg.channel.id, "<:error:372786041637306368> An error occured");
 }, {
   description: 'Request a feature for the future DynamicBot',
   fullDescription: 'Request a feature for the future DynamicBot by Ape, AS04, CoalSephos, Eleos, KhaaZ, Mika .K',
