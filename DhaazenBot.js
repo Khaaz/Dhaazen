@@ -1276,7 +1276,7 @@ bot.registerCommand('upload', (msg, args) => {
 bot.registerCommand('fr', (msg, args) => {
   let request = args.join(' ')
   try {
-    bot.createMessage(378336643247243295, {
+    bot.createMessage('378336643247243295', {
       embed: {
         timestamp: new Date(),
         title: `Requested in: ${msg.channel.guild.name}`,
@@ -1292,7 +1292,7 @@ bot.registerCommand('fr', (msg, args) => {
     });
     bot.createMessage(msg.channel.id, "<:success:372785537221787658> Your feature request was successfully submited")
   } catch (err)
-    bot.createMessage(378336643247243295, "<:error:372786041637306368> An error occured");
+    bot.createMessage('378336643247243295', "<:error:372786041637306368> An error occured");
     bot.createMessage(msg.channel.id, "<:error:372786041637306368> An error occured");
 }, {
   description: 'Request a feature for the future DynamicBot',
