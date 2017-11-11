@@ -1289,7 +1289,7 @@ bot.registerCommand('fr', (msg, args) => {
           icon_url: msg.author.avatar
         }
       }
-    })
+    });
     bot.createMessage(msg.channel.id, "<:success:372785537221787658> Your feature request was successfully submited")
   } catch (err)
     bot.createMessage(378336643247243295, "<:error:372786041637306368> An error occured");
