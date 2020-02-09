@@ -1,4 +1,11 @@
-# Dhaazen_discordbot
+# Dhaazen
+Discontinued.
+
+## Overview
+
+## Goal / Requirements
+
+## Technologies
 
 Discord Bot write in javascript using Eris lib.
 
