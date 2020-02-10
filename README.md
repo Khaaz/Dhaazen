@@ -1,20 +1,21 @@
-# Dhaazen
-Discontinued.
+# Dhaaazen [PP]
 
-## Overview
++ **Category**: Personal Project
++ **Status**: Discontinued
 
-## Goal / Requirements
+## **Overview**
 
-## Technologies
+This is the first real project I ever worked on. This code is terribly written and outdated, but I like keeping this for memory.
+This project will be archived and kept strictly for memory of my first ever project.
 
-Discord Bot write in javascript using Eris lib.
+Look at this code if you like, try to run it if you dare but don't judge me :')
 
-=================================================================================================
+## **Goal / Requirements**
 
-This bot is running an old and bad code. You can still watch it or take whatever you want frome here.
-This repo will remain as a "remember" repository.
+This bot has for purpose to learn javascript and make something functional. It was created by taking inspiration of other small not well written bots.
 
-==================================================================================================
+## **Technologies**
 
-This bot is no longer supported. The developpement is entirely stopped.
-It is also no longer hosted.
+- Javscript
+- Node.js
+- [Eris](https://github.com/abalabahaha/eris) library
